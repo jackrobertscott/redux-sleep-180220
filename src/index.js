@@ -1,3 +1,4 @@
+require('babel-polyfill');
 const { createAction, handleActions, combineActions } = require('redux-actions');
 const { constantCase, camelCase } = require('change-case');
 const { plural, singular } = require('pluralize');
