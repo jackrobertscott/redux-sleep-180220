@@ -2,7 +2,7 @@
   "name": "redux-sleep",
   "version": "0.1.0",
   "description": "Convention over configuration approach to redux facing RESTful endpoints.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "babel src -d lib",
     "test": "npm run build && ava",
