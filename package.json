@@ -4,7 +4,10 @@
   "description": "Convention over configuration approach to redux facing RESTful endpoints.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel src -d lib",
+    "test": "npm run build && ava",
+    "release": "np",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -22,5 +25,22 @@
   "bugs": {
     "url": "https://github.com/jackrobertscott/redux-sleep/issues"
   },
-  "homepage": "https://github.com/jackrobertscott/redux-sleep#readme"
+  "homepage": "https://github.com/jackrobertscott/redux-sleep#readme",
+  "devDependencies": {
+    "ava": "^0.25.0",
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.18.0",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.7.0",
+    "np": "^2.20.1"
+  },
+  "dependencies": {
+    "change-case": "^3.0.1",
+    "pluralize": "^7.0.0",
+    "redux-actions": "^2.2.1"
+  }
 }
