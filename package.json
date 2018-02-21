@@ -4,8 +4,10 @@
   "description": "Convention over configuration approach to redux facing RESTful endpoints.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel src -d lib",
+    "clean": "rm -rf lib && mkdir lib",
+    "build": "npm run clean && babel src -d lib",
     "test": "npm run build && ava",
+    "test:watch": "npm run build && npm run test -- --watch",
     "release": "np",
     "prepublish": "npm run build"
   },
