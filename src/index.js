@@ -24,7 +24,7 @@ class Resource {
     this.appName = camelCase(appName);
     this.resourceName = camelCase(resourceName);
     this.initialState = Object.assign({
-      [this.arrayName]: [],
+      [this.manyName]: [],
       [this.singleName]: null,
       problem: null,
       loading: false,
@@ -46,7 +46,7 @@ class Resource {
   /**
    * Set the name of the property used to hold an array of items.
    */
-  get arrayName() {
+  get manyName() {
     return plural(this.resourceName);
   }
 
@@ -90,13 +90,13 @@ class Resource {
       type: 'set', // set an array of entities
       handler: (state, { payload = [] }) => ({
         ...state,
-        [this.arrayName]: payload,
+        [this.manyName]: payload,
       }),
     }, {
       type: 'replace', // replace an item in the entities array
       handler: (state, { payload = {} }) => ({
         ...state,
-        [this.arrayName]: state[this.arrayName].map((item) => {
+        [this.manyName]: state[this.manyName].map((item) => {
           if (item.id === payload.id) {
             return payload;
           }
@@ -107,13 +107,13 @@ class Resource {
       type: 'remove', // remove an item in the entities array
       handler: (state, { payload = null }) => ({
         ...state,
-        [this.arrayName]: state[this.arrayName].filter(item => item.id !== payload),
+        [this.manyName]: state[this.manyName].filter(item => item.id !== payload),
       }),
     }, {
       type: 'add', // add an item to the entities array
       handler: (state, { payload = null }) => ({
         ...state,
-        [this.arrayName]: [...state[this.arrayName], payload],
+        [this.manyName]: [...state[this.manyName], payload],
       }),
     }, {
       type: 'current', // set the current entity obj
