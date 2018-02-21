@@ -22,7 +22,7 @@ class Resource {
       throw new Error('Option "methods" must be given to the Resource constructor as an array.');
     }
     this.appName = camelCase(appName);
-    this.resourceName = camelCase(resourceName);
+    this.resourceName = camelCase(singular(resourceName));
     this.initialState = Object.assign({
       [this.manyName]: [],
       [this.singleName]: null,
