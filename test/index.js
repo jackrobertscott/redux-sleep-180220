@@ -1,6 +1,6 @@
 import test from 'ava';
 import { plural, singular } from 'pluralize';
-import Resource from '../lib/index';
+import { Resource } from '../lib/index';
 
 test('resource exists', t => t.truthy(Resource));
 
@@ -8,7 +8,7 @@ const appName = 'app';
 const resourceName = 'example';
 const exampleResource = new Resource(appName, resourceName);
 
-test('resource array name is set correctly', t => t.is(exampleResource.arrayName, plural(resourceName)));
+test('resource array name is set correctly', t => t.is(exampleResource.manyName, plural(resourceName)));
 test('resource single name is set correctly', t => t.is(exampleResource.singleName, singular(resourceName)));
 test('reducer exists', t => t.truthy(exampleResource.reducer));
 
