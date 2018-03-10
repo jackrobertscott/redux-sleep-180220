@@ -1,4 +1,5 @@
 # redux-sleep
+
 [![Build Status](https://travis-ci.org/jackrobertscott/redux-sleep.svg?branch=master)](https://travis-ci.org/jackrobertscott/redux-sleep)
 
 Convention over configuration approach to redux facing RESTful endpoints.

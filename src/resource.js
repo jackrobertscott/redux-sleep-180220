@@ -4,24 +4,26 @@ const { plural, singular } = require('pluralize');
 const { thunkify, checkString } = require('./util');
 
 class Resource {
+
   /**
    * Initialise all properties.
    */
-  constructor(appName, resourceName, { state = {}, methods = [], thunks = [] } = {}) {
-    if (typeof resourceName !== 'string') {
-      throw new Error('Parameter "resourceName" must be given to the Resource constructor as string.');
+  constructor({
+    scope,
+    name,
+    state = {},
+  } = {}) {
+    if (typeof scope !== 'string') {
+      throw new Error('Parameter "package" must be given to the Resource constructor as string.');
+    }
+    if (typeof name !== 'string') {
+      throw new Error('Parameter "name" must be given to the Resource constructor as string.');
     }
     if (typeof state !== 'object') {
       throw new Error('Option "state" must be given to the Resource constructor as an object.');
     }
-    if (!Array.isArray(thunks)) {
-      throw new Error('Option "thunks" must be given to the Resource constructor as an array.');
-    }
-    if (!Array.isArray(methods)) {
-      throw new Error('Option "methods" must be given to the Resource constructor as an array.');
-    }
-    this.appName = camelCase(appName);
-    this.resourceName = camelCase(singular(resourceName));
+    this.scope = camelCase(scope);
+    this.name = camelCase(singular(name));
     this.initialState = Object.assign({
       [this.manyName]: [],
       [this.singleName]: null,
@@ -29,12 +31,8 @@ class Resource {
       loading: false,
       success: null,
     }, state || {});
-    this.methods = this.defaults.concat(methods)
-      .map(this.formatMethod.bind(this))
-      .reduce((map, method) => map.set(method.type, method), new Map());
-    this.thunks = [].concat(thunks)
-      .map(this.formatThunk.bind(this))
-      .reduce((map, method) => map.set(method.name, method), new Map());
+    this.methods = new Map([...this.defaults.entries()].map(this.formatMethod.bind(this)));
+    this.thunks = new Map();
     this.thunkify = thunkify({
       start: dispatch => dispatch(this.action('loading')()),
       end: dispatch => dispatch(this.action('loading')(false)),
@@ -46,54 +44,44 @@ class Resource {
    * Set the name of the property used to hold an array of items.
    */
   get manyName() {
-    return plural(this.resourceName);
+    return plural(this.name);
   }
 
   /**
    * Set the name of the property used to hold an singular of item.
    */
   get singleName() {
-    return singular(this.resourceName);
+    return singular(this.name);
   }
 
   /**
    * Set the default methods of the reducer.
    */
   get defaults() {
-    return [{
-      type: 'reset', // set to the initial state
-      handler: () => ({
+    const methods = new Map();
+    methods
+      .set('reset', () => ({
         ...this.initialState,
-      }),
-    }, {
-      type: 'loading', // update loading status
-      handler: (state, { payload = true }) => ({
+      }))
+      .set('loading', (state, { payload = true }) => ({
         ...state,
         loading: payload,
         problem: payload ? null : state.problem,
         success: payload ? null : state.success,
-      }),
-    }, {
-      type: 'success', // update success property
-      handler: (state, { payload = { status: true } }) => ({
+      }))
+      .set('success', (state, { payload = { status: true } }) => ({
         ...state,
         success: payload,
-      }),
-    }, {
-      type: 'errored', // update error property
-      handler: (state, { payload = null }) => ({
+      }))
+      .set('errored', (state, { payload = null }) => ({
         ...state,
         problem: payload,
-      }),
-    }, {
-      type: 'set', // set an array of entities
-      handler: (state, { payload = [] }) => ({
+      }))
+      .set('set', (state, { payload = [] }) => ({
         ...state,
         [this.manyName]: payload,
-      }),
-    }, {
-      type: 'replace', // replace an item in the entities array
-      handler: (state, { payload = {} }) => ({
+      }))
+      .set('replace', (state, { payload = {} }) => ({
         ...state,
         [this.manyName]: state[this.manyName].map((item) => {
           if (item.id === payload.id) {
@@ -101,74 +89,88 @@ class Resource {
           }
           return item;
         }),
-      }),
-    }, {
-      type: 'remove', // remove an item in the entities array
-      handler: (state, { payload = null }) => ({
+      }))
+      .set('remove', (state, { payload = null }) => ({
         ...state,
         [this.manyName]: state[this.manyName].filter(item => item.id !== payload),
-      }),
-    }, {
-      type: 'add', // add an item to the entities array
-      handler: (state, { payload = null }) => ({
+      }))
+      .set('add', (state, { payload = null }) => ({
         ...state,
         [this.manyName]: [...state[this.manyName], payload],
-      }),
-    }, {
-      type: 'current', // set the current entity obj
-      handler: (state, { payload = null }) => ({
+      }))
+      .set('current', (state, { payload = null }) => ({
         ...state,
         [this.singleName]: payload,
-      }),
-    }];
+      }));
+    return methods;
   }
 
   /**
    * Get the reducer.
    */
   get reducer() {
-    const handlers = [...this.methods.values()]
-      .reduce((accum, { type, handler }) => Object.assign(accum, {
+    const handlers = [...this.methods.entries()]
+      .reduce((accum, [type, handler]) => Object.assign(accum, {
         [type]: handler,
       }), {});
     return handleActions(handlers, this.initialState);
   }
 
   /**
+   * Add a method to the reducer.
+   */
+  addMethod(type, handler) {
+    checkString(type, { method: 'addMethod' });
+    if (typeof handler !== 'function') {
+      throw new Error('Parameter "handler" must be of type function for Resource.addMethod method.');
+    }
+    this.methods.set(...this.formatMethod([type, handler]));
+  }
+
+  /**
+   * Add a method to the reducer.
+   */
+  addThunk(type, work) {
+    checkString(type, { method: 'addThunk' });
+    if (typeof work !== 'function') {
+      throw new Error('Parameter "work" must be of type function for Resource.addMethod method.');
+    }
+    this.methods.set(...this.formatThunk([type, work]));
+  }
+
+  /**
    * Add an action and handler combination to the reducer.
    */
-  formatMethod({ type, handler }) {
-    if (typeof type !== 'string' && !Array.isArray(type)) {
+  formatMethod([type, handler]) {
+    if (typeof type !== 'string') {
       throw new Error('Method "type" property must be passed in as a string or array of strings.');
     }
     if (typeof handler !== 'function') {
       throw new Error('Method "handler" property must be passed in as a function.');
     }
-    return {
-      type: Array.isArray(type) ? combineActions(...type.map((item) => {
-        if (typeof item === 'string') {
-          return this.localise(item);
-        }
-        return item;
-      })) : this.localise(type),
-      handler,
-    };
+    const key = Array.isArray(type) ? combineActions(...type.map((item) => {
+      if (typeof item === 'string') {
+        return this.localise(item);
+      }
+      return item;
+    })) : this.localise(type);
+    return [key, handler];
   }
 
   /**
    * Register a new thunk with the resource.
    */
-  formatThunk({ name, work }) {
+  formatThunk([name, work]) {
     if (typeof name !== 'string') {
       throw new Error('Method "name" property must be passed in as a string or array of strings.');
     }
     if (typeof work !== 'function') {
       throw new Error('Method "work" property must be passed in as a function.');
     }
-    return {
-      name: this.localise(name),
+    return [
+      this.localise(name),
       work,
-    };
+    ];
   }
 
   /**
@@ -176,7 +178,7 @@ class Resource {
    */
   localise(type) {
     checkString(type, { method: 'localise' });
-    return `${this.appName}/${this.resourceName}/${constantCase(type)}`;
+    return `${this.scope}/${this.name}/${constantCase(type)}`;
   }
 
   /**
@@ -188,7 +190,7 @@ class Resource {
     if (!this.methods.has(action)) {
       throw new Error(`Action "${action}" does not exist on the resource.`);
     }
-    return createAction(this.methods.get(action).type);
+    return createAction(action);
   }
 
   /**
