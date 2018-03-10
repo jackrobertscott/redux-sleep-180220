@@ -125,6 +125,7 @@ class Resource {
       throw new Error('Parameter "handler" must be of type function for Resource.addMethod method.');
     }
     this.methods.set(...this.formatMethod([type, handler]));
+    return this;
   }
 
   /**
@@ -136,6 +137,7 @@ class Resource {
       throw new Error('Parameter "work" must be of type function for Resource.addMethod method.');
     }
     this.methods.set(...this.formatThunk([type, work]));
+    return this;
   }
 
   /**
