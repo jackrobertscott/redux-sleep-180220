@@ -131,12 +131,12 @@ class Resource {
   /**
    * Add a method to the reducer.
    */
-  addThunk(type, work) {
-    checkString(type, { method: 'addThunk' });
+  addThunk(name, work) {
+    checkString(name, { method: 'addThunk' });
     if (typeof work !== 'function') {
-      throw new Error('Parameter "work" must be of type function for Resource.addMethod method.');
+      throw new Error('Parameter "work" must be of type function for Resource.addThunk method.');
     }
-    this.methods.set(...this.formatThunk([type, work]));
+    this.thunks.set(...this.formatThunk([name, work]));
     return this;
   }
 

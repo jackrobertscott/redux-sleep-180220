@@ -17,6 +17,8 @@ exampleResource.addMethod('hello', () => ({
   hello: true,
 }));
 
+exampleResource.addThunk('example', () => () => async () => console.log('hello'));
+
 test('resource array name is set correctly', t => t.is(exampleResource.manyName, plural(name)));
 test('resource single name is set correctly', t => t.is(exampleResource.singleName, singular(name)));
 test('reducer exists', t => t.truthy(exampleResource.reducer));
@@ -37,3 +39,5 @@ actions.forEach((action) => {
   test(`should contain a "${action}" action`, t => t.notThrows(exampleResource.action(action)));
 });
 test('should not contain a "doesNotExist" action', t => t.throws(() => exampleResource.action('doesNotExist')));
+// test('should contain a "example" thunk', t => t.notThrows(exampleResource.thunk('example')));
+// test('should not contain a "doesNotExist" action', t => t.throws(() => exampleResource.thunk('doesNotExist')));
