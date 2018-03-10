@@ -39,5 +39,5 @@ actions.forEach((action) => {
   test(`should contain a "${action}" action`, t => t.notThrows(exampleResource.action(action)));
 });
 test('should not contain a "doesNotExist" action', t => t.throws(() => exampleResource.action('doesNotExist')));
-// test('should contain a "example" thunk', t => t.notThrows(exampleResource.thunk('example')));
-// test('should not contain a "doesNotExist" action', t => t.throws(() => exampleResource.thunk('doesNotExist')));
+test('should contain a "example" thunk', t => t.notThrows(exampleResource.thunk('example')));
+test('should not contain a "doesNotExist" action', t => t.throws(() => exampleResource.thunk('doesNotExist')));

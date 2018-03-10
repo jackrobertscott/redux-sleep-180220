@@ -204,7 +204,7 @@ class Resource {
     if (!this.thunks.has(thunk)) {
       throw new Error(`Thunk "${thunk}" does not exist on the resource.`);
     }
-    return (...args) => this.thunkify(this.thunks.get(thunk).work(...args)(this));
+    return (...args) => this.thunkify(this.thunks.get(thunk)(...args)(this));
   }
 }
 
