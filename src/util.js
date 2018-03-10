@@ -26,7 +26,7 @@ function thunkify({ start, end, error }) {
 /**
  * Check an parameter is a string or throw an error.
  */
-function checkString(chars, { method, message }) {
+function checkString(chars, { method, message } = {}) {
   if (typeof chars !== 'string') {
     throw new Error(message || `String parameter must be given to the ${method || 'unknown'} method.`);
   }
