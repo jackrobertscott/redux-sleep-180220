@@ -15,6 +15,9 @@ function thunkify({ start, end, error }) {
       if (error) {
         error(problem, dispatch, getState);
       }
+      if (['fail', 'error'].indexOf(problem.status) < 0) {
+        throw problem;
+      }
     }
     if (end) {
       end(dispatch, getState);

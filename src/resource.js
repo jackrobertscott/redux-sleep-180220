@@ -11,6 +11,7 @@ class Resource {
   constructor({
     scope,
     name,
+    key,
     state = {},
   } = {}) {
     if (typeof scope !== 'string') {
@@ -24,6 +25,7 @@ class Resource {
     }
     this.scope = camelCase(scope);
     this.name = camelCase(singular(name));
+    this.key = key || '_id';
     this.initialState = Object.assign({
       [this.manyName]: [],
       [this.singleName]: null,
@@ -84,7 +86,7 @@ class Resource {
       .set('replace', (state, { payload = {} }) => ({
         ...state,
         [this.manyName]: state[this.manyName].map((item) => {
-          if (item.id === payload.id) {
+          if (item[this.key] === payload[this.key]) {
             return payload;
           }
           return item;
@@ -92,7 +94,7 @@ class Resource {
       }))
       .set('remove', (state, { payload = null }) => ({
         ...state,
-        [this.manyName]: state[this.manyName].filter(item => item.id !== payload),
+        [this.manyName]: state[this.manyName].filter(item => item[this.key] !== payload),
       }))
       .set('add', (state, { payload = null }) => ({
         ...state,
