@@ -17,7 +17,7 @@ exampleResource.addMethod('hello', () => ({
   hello: true,
 }));
 
-exampleResource.addThunk('example', () => () => async () => {});
+exampleResource.addThunk('example', () => async () => {});
 
 test('resource array name is set correctly', t => t.is(exampleResource.manyName, plural(name)));
 test('resource single name is set correctly', t => t.is(exampleResource.singleName, singular(name)));

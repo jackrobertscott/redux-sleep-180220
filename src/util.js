@@ -1,7 +1,7 @@
 /**
  * Wrap thunk function in a helpful loading and error handling wrapper.
  */
-function thunkify({ start, end, error }) {
+function thunkify({ start, end, error, debug }) {
   return work => async (dispatch, getState) => {
     let result;
     let problem;
@@ -15,8 +15,8 @@ function thunkify({ start, end, error }) {
       if (error) {
         error(problem, dispatch, getState);
       }
-      if (['fail', 'error'].indexOf(problem.status) < 0) {
-        throw problem;
+      if (debug) {
+        throw e;
       }
     }
     if (end) {

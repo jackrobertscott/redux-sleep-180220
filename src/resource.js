@@ -13,6 +13,7 @@ class Resource {
     name,
     key,
     state = {},
+    debug = false,
   } = {}) {
     if (typeof scope !== 'string') {
       throw new Error('Parameter "package" must be given to the Resource constructor as string.');
@@ -25,6 +26,7 @@ class Resource {
     }
     this.scope = camelCase(scope);
     this.name = camelCase(singular(name));
+    this.debug = debug;
     this.key = key || '_id';
     this.initialState = Object.assign({
       [this.manyName]: [],
@@ -39,6 +41,7 @@ class Resource {
       start: dispatch => dispatch(this.action('loading')()),
       end: dispatch => dispatch(this.action('loading')(false)),
       error: (e, dispatch) => dispatch(this.action('errored')(e)),
+      debug: this.debug,
     });
   }
 
@@ -206,7 +209,7 @@ class Resource {
     if (!this.thunks.has(thunk)) {
       throw new Error(`Thunk "${thunk}" does not exist on the resource.`);
     }
-    return (...args) => this.thunkify(this.thunks.get(thunk)(...args)(this));
+    return (...args) => this.thunkify(this.thunks.get(thunk)(...args));
   }
 }
 
