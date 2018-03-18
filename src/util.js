@@ -18,9 +18,10 @@ function thunkify({ start, end, error, debug }) {
       if (debug) {
         throw e;
       }
-    }
-    if (end) {
-      end(dispatch, getState);
+    } finally {
+      if (end) {
+        end(dispatch, getState);
+      }
     }
     return { error: problem, data: result };
   };
