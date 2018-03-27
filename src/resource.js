@@ -66,6 +66,13 @@ class Resource {
         ...this.initialState,
       }),
     }, {
+      type: 'clean',
+      handler: state => ({
+        ...state,
+        problem: null,
+        success: null,
+      }),
+    }, {
       type: 'loading', // update loading status
       handler: (state, { payload = true }) => ({
         ...state,
