@@ -1,7 +1,7 @@
 /**
  * Wrap thunk function in a helpful loading and error handling wrapper.
  */
-function thunkify({ start, end, error }) {
+function thunkify({ start, end, error, debug }) {
   return work => async (dispatch, getState) => {
     let result;
     let problem;
@@ -15,9 +15,13 @@ function thunkify({ start, end, error }) {
       if (error) {
         error(problem, dispatch, getState);
       }
-    }
-    if (end) {
-      end(dispatch, getState);
+      if (debug) {
+        throw e;
+      }
+    } finally {
+      if (end) {
+        end(dispatch, getState);
+      }
     }
     return { error: problem, data: result };
   };
