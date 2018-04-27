@@ -16,7 +16,7 @@ function thunkify({ start, end, error, debug }) {
         error(problem, dispatch, getState);
       }
       if (debug) {
-        throw e;
+        console.error(e);
       }
     } finally {
       if (end) {
