@@ -23,7 +23,7 @@ function thunkify({ start, end, error, debug }) {
         end(dispatch, getState);
       }
     }
-    return { error: problem, data: result };
+    return { error: problem, data: result || {} };
   };
 }
 
