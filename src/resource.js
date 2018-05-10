@@ -14,6 +14,7 @@ class Resource {
     key,
     state = {},
     debug = false,
+    hooks = {},
   } = {}) {
     if (typeof scope !== 'string') {
       throw new Error('Parameter "package" must be given to the Resource constructor as string.');
@@ -38,9 +39,9 @@ class Resource {
     this.methods = new Map([...this.defaults.entries()].map(this.formatMethod.bind(this)));
     this.thunks = new Map();
     this.thunkify = thunkify({
-      start: dispatch => dispatch(this.action('loading')()),
-      end: dispatch => dispatch(this.action('loading')(false)),
-      error: (e, dispatch) => dispatch(this.action('errored')(e)),
+      start: hooks.start || (dispatch => dispatch(this.action('loading')())),
+      end: hooks.end || (dispatch => dispatch(this.action('loading')(false))),
+      error: hooks.error || ((e, dispatch) => dispatch(this.action('errored')(e))),
       debug: this.debug,
     });
   }
