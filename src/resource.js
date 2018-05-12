@@ -12,7 +12,7 @@ class Resource {
     expect({ name: 'payload', value: payload, type: 'string', optional: true });
     expect({ name: 'handler', value: handler, type: 'function' });
     return (state, data) => {
-      if (payload) {
+      if (payload && data && typeof data.payload !== 'undefined') {
         if (payload === 'array') {
           if (!Array.isArray(data.payload)) {
             throw new Error(`Expected value "payload" to be of type "array" but got ${typeof data.payload}.`);
