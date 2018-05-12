@@ -1,6 +1,6 @@
 {
   "name": "redux-sleep",
-  "version": "0.4.4",
+  "version": "0.5.0",
   "description": "Convention over configuration approach to redux facing RESTful endpoints.",
   "main": "lib/index.js",
   "scripts": {
