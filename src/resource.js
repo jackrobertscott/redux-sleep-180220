@@ -1,9 +1,29 @@
 const { createAction, handleActions, combineActions } = require('redux-actions');
 const { constantCase, camelCase } = require('change-case');
 const { plural, singular } = require('pluralize');
-const { thunkify, checkString } = require('./util');
+const { thunkify, checkString, expect } = require('./util');
 
 class Resource {
+
+  /**
+   * Check that the payload of the action is okay.
+   */
+  static expect({ payload, handler }) {
+    expect({ name: 'payload', value: payload, type: 'string', optional: true });
+    expect({ name: 'handler', value: handler, type: 'function' });
+    return (state, data) => {
+      if (payload) {
+        if (payload === 'array') {
+          if (!Array.isArray(data.payload)) {
+            throw new Error(`Expected value "payload" to be of type "array" but got ${typeof data.payload}.`);
+          }
+        } else {
+          expect({ name: 'payload', value: data.payload, type: payload, optional: true });
+        }
+      }
+      return handler(state, data);
+    };
+  }
 
   /**
    * Initialise all properties.
@@ -66,52 +86,80 @@ class Resource {
   get defaults() {
     const methods = new Map();
     methods
-      .set('reset', () => ({
-        ...this.initialState,
-      }))
-      .set('clean', state => ({
-        ...state,
-        problem: null,
-        success: null,
-      }))
-      .set('loading', (state, { payload = true }) => ({
-        ...state,
-        loading: payload,
-        problem: payload ? null : state.problem,
-        success: payload ? null : state.success,
-      }))
-      .set('success', (state, { payload = { status: true } }) => ({
-        ...state,
-        success: payload,
-      }))
-      .set('errored', (state, { payload = null }) => ({
-        ...state,
-        problem: payload,
-      }))
-      .set('set', (state, { payload = [] }) => ({
-        ...state,
-        [this.manyName]: payload,
-      }))
-      .set('replace', (state, { payload = {} }) => ({
-        ...state,
-        [this.manyName]: state[this.manyName].map((item) => {
-          if (item[this.key] === payload[this.key]) {
-            return payload;
-          }
-          return item;
+      .set('reset', Resource.expect({
+        handler: () => ({
+          ...this.initialState,
         }),
       }))
-      .set('remove', (state, { payload = null }) => ({
-        ...state,
-        [this.manyName]: state[this.manyName].filter(item => item[this.key] !== payload),
+      .set('clean', Resource.expect({
+        handler: state => ({
+          ...state,
+          problem: null,
+          success: null,
+        }),
       }))
-      .set('add', (state, { payload = null }) => ({
-        ...state,
-        [this.manyName]: [...state[this.manyName], payload],
+      .set('loading', Resource.expect({
+        payload: 'boolean',
+        handler: (state, { payload = true }) => ({
+          ...state,
+          loading: payload,
+          problem: payload ? null : state.problem,
+          success: payload ? null : state.success,
+        }),
       }))
-      .set('current', (state, { payload = null }) => ({
-        ...state,
-        [this.singleName]: payload,
+      .set('success', Resource.expect({
+        payload: 'object',
+        handler: (state, { payload = { status: true } }) => ({
+          ...state,
+          success: payload,
+        }),
+      }))
+      .set('errored', Resource.expect({
+        payload: 'object',
+        handler: (state, { payload = null }) => ({
+          ...state,
+          problem: payload,
+        }),
+      }))
+      .set('set', Resource.expect({
+        payload: 'array',
+        handler: (state, { payload = [] }) => ({
+          ...state,
+          [this.manyName]: payload,
+        }),
+      }))
+      .set('replace', Resource.expect({
+        payload: 'object',
+        handler: (state, { payload = null }) => ({
+          ...state,
+          [this.manyName]: payload ? (state[this.manyName] || []).map((item) => {
+            if (item[this.key] === payload[this.key]) {
+              return payload;
+            }
+            return item;
+          }) : state[this.manyName],
+        }),
+      }))
+      .set('remove', Resource.expect({
+        payload: 'string',
+        handler: (state, { payload = null }) => ({
+          ...state,
+          [this.manyName]: (state[this.manyName] || []).filter(item => item[this.key] !== payload),
+        }),
+      }))
+      .set('add', Resource.expect({
+        payload: 'object',
+        handler: (state, { payload = null }) => ({
+          ...state,
+          [this.manyName]: [...(state[this.manyName] || []), payload],
+        }),
+      }))
+      .set('current', Resource.expect({
+        payload: 'object',
+        handler: (state, { payload = null }) => ({
+          ...state,
+          [this.singleName]: payload,
+        }),
       }));
     return methods;
   }

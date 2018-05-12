@@ -6,6 +6,7 @@
 		"padded-blocks": "off",
 		"no-confusing-arrow": "off",
 		"no-underscore-dangle": "off",
+		"valid-typeof": "off",
 		"linebreak-style": 0
 	},
 	"env": {
