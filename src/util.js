@@ -28,15 +28,6 @@ module.exports.thunkify = function thunkify({ start, end, error, debug }) {
 };
 
 /**
- * Check an parameter is a string or throw an error.
- */
-module.exports.checkString = function checkString(chars, { method, message } = {}) {
-  if (typeof chars !== 'string') {
-    throw new Error(message || `String parameter must be given to the ${method || 'unknown'} method.`);
-  }
-};
-
-/**
  * Make sure everything is of the correct type.
  */
 module.exports.expect = function expect({ name, value, type = 'string', optional = false } = {}) {

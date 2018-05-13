@@ -1,12 +1,12 @@
 import 'babel-polyfill';
 import test from 'ava';
-import { checkString, thunkify } from '../lib/util';
+import { expect, thunkify } from '../lib/util';
 
 test('should error if no string passed', (t) => {
-  const error = t.throws(() => checkString());
-  t.is(error.message, 'String parameter must be given to the unknown method.');
+  const error = t.throws(() => expect({ name: 'example', value: null, type: 'string' }));
+  t.is(error.message, 'Expected value "example" to be of type string but got object.');
 });
-test('should not error if string passed', t => t.notThrows(() => checkString('example')));
+test('should not error if string passed', t => t.notThrows(() => expect({ name: 'example', value: 'hello', type: 'string' })));
 
 const setup = () => {
   const values = {

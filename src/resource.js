@@ -1,7 +1,7 @@
 const { createAction, handleActions, combineActions } = require('redux-actions');
 const { constantCase, camelCase } = require('change-case');
 const { plural, singular } = require('pluralize');
-const { thunkify, checkString, expect } = require('./util');
+const { thunkify, expect } = require('./util');
 
 class Resource {
 
@@ -35,16 +35,14 @@ class Resource {
     state = {},
     debug = false,
     hooks = {},
+    capture = () => {},
   } = {}) {
-    if (typeof scope !== 'string') {
-      throw new Error('Parameter "package" must be given to the Resource constructor as string.');
-    }
-    if (typeof name !== 'string') {
-      throw new Error('Parameter "name" must be given to the Resource constructor as string.');
-    }
-    if (typeof state !== 'object') {
-      throw new Error('Option "state" must be given to the Resource constructor as an object.');
-    }
+    expect({ name: 'scope', value: scope, type: 'string' });
+    expect({ name: 'name', value: name, type: 'string' });
+    expect({ name: 'state', value: state, type: 'object' });
+    expect({ name: 'debug', value: debug, type: 'boolean' });
+    expect({ name: 'hooks', value: hooks, type: 'object' });
+    expect({ name: 'capture', value: capture, type: 'function' });
     this.scope = camelCase(scope);
     this.name = camelCase(singular(name));
     this.debug = debug;
@@ -179,10 +177,8 @@ class Resource {
    * Add a method to the reducer.
    */
   addMethod(type, handler) {
-    checkString(type, { method: 'addMethod' });
-    if (typeof handler !== 'function') {
-      throw new Error('Parameter "handler" must be of type function for Resource.addMethod method.');
-    }
+    expect({ name: 'type', value: type, type: 'string' });
+    expect({ name: 'handler', value: handler, type: 'function' });
     this.methods.set(...this.formatMethod([type, handler]));
     return this;
   }
@@ -191,10 +187,8 @@ class Resource {
    * Add a method to the reducer.
    */
   addThunk(name, work) {
-    checkString(name, { method: 'addThunk' });
-    if (typeof work !== 'function') {
-      throw new Error('Parameter "work" must be of type function for Resource.addThunk method.');
-    }
+    expect({ name: 'name', value: name, type: 'string' });
+    expect({ name: 'work', value: work, type: 'function' });
     this.thunks.set(...this.formatThunk([name, work]));
     return this;
   }
@@ -203,12 +197,8 @@ class Resource {
    * Add an action and handler combination to the reducer.
    */
   formatMethod([type, handler]) {
-    if (typeof type !== 'string') {
-      throw new Error('Method "type" property must be passed in as a string or array of strings.');
-    }
-    if (typeof handler !== 'function') {
-      throw new Error('Method "handler" property must be passed in as a function.');
-    }
+    expect({ name: 'type', value: type, type: 'string' });
+    expect({ name: 'handler', value: handler, type: 'function' });
     const key = Array.isArray(type) ? combineActions(...type.map((item) => {
       if (typeof item === 'string') {
         return this.localise(item);
@@ -222,12 +212,8 @@ class Resource {
    * Register a new thunk with the resource.
    */
   formatThunk([name, work]) {
-    if (typeof name !== 'string') {
-      throw new Error('Method "name" property must be passed in as a string or array of strings.');
-    }
-    if (typeof work !== 'function') {
-      throw new Error('Method "work" property must be passed in as a function.');
-    }
+    expect({ name: 'name', value: name, type: 'string' });
+    expect({ name: 'work', value: work, type: 'function' });
     return [
       this.localise(name),
       work,
@@ -238,7 +224,7 @@ class Resource {
    * Localise the action to this class.
    */
   localise(type) {
-    checkString(type, { method: 'localise' });
+    expect({ name: 'type', value: type, type: 'string' });
     return `${this.scope}/${this.name}/${constantCase(type)}`;
   }
 
@@ -246,7 +232,7 @@ class Resource {
    * Get the action for a particular reducer handler.
    */
   action(type) {
-    checkString(type, { method: 'action' });
+    expect({ name: 'type', value: type, type: 'string' });
     const action = this.localise(type);
     if (!this.methods.has(action)) {
       throw new Error(`Action "${action}" does not exist on the resource.`);
@@ -258,7 +244,7 @@ class Resource {
    * Get a thunk function wrapped in a loading and error handler.
    */
   thunk(name) {
-    checkString(name, { method: 'thunk' });
+    expect({ name: 'name', value: name, type: 'string' });
     const thunk = this.localise(name);
     if (!this.thunks.has(thunk)) {
       throw new Error(`Thunk "${thunk}" does not exist on the resource.`);
