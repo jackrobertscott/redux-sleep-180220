@@ -1,7 +1,7 @@
 /**
  * Wrap thunk function in a helpful loading and error handling wrapper.
  */
-module.exports.thunkify = function thunkify({ start, end, error, debug }) {
+module.exports.thunkify = function thunkify({ start, end, error, debug, capture }) {
   return work => async (dispatch, getState) => {
     let result;
     let problem;
@@ -12,6 +12,9 @@ module.exports.thunkify = function thunkify({ start, end, error, debug }) {
       result = await work(dispatch, getState);
     } catch (e) {
       problem = e;
+      if (capture) {
+        capture(e);
+      }
       if (error) {
         error(problem, dispatch, getState);
       }

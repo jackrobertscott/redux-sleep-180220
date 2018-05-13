@@ -14,6 +14,7 @@ const setup = () => {
     end: false,
     error: false,
     work: false,
+    capture: false,
   };
   const thunk = thunkify({
     start: () => {
@@ -24,6 +25,9 @@ const setup = () => {
     },
     error: () => {
       values.error = true;
+    },
+    capture: () => {
+      values.capture = true;
     },
   });
   return { values, thunk };
@@ -39,6 +43,7 @@ test('should update the states when exectuing work', (t) => {
     t.true(values.end);
     t.false(values.error);
     t.true(values.work);
+    t.false(values.capture);
   });
 });
 
@@ -52,5 +57,6 @@ test('should error when a error occurs in work', (t) => {
     t.true(values.end);
     t.true(values.error);
     t.false(values.work);
+    t.true(values.capture);
   });
 });

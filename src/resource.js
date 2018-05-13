@@ -46,6 +46,7 @@ class Resource {
     this.scope = camelCase(scope);
     this.name = camelCase(singular(name));
     this.debug = debug;
+    this.capture = capture;
     this.key = key || '_id';
     this.initialState = Object.assign({
       [this.manyName]: [],
@@ -61,6 +62,7 @@ class Resource {
       end: hooks.end || (dispatch => dispatch(this.action('loading')(false))),
       error: hooks.error || ((e, dispatch) => dispatch(this.action('errored')(e))),
       debug: this.debug,
+      capture: this.capture,
     });
   }
 
